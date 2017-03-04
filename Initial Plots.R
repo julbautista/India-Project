@@ -2,7 +2,7 @@ source("https://raw.githubusercontent.com/julbautista/Startup/master/julian_star
 setwd("C:/Users/Julian Bautista/Documents/Portfolio/India Project")
 
 
-df <- read.csv("https://raw.githubusercontent.com/alexpavlakis/india_project/master/Julian_Final_Form.csv", header = T, skip = 2)
+df <- read.csv("https://raw.githubusercontent.com/julbautista/India-Project/master/India_Data.csv", header = T, skip = 2)
 
 #Drop Andaman and Nicobar & Dadra NH & Daman and Diu & Lakshadweep & Chandigarh and 2003
 df <- df[df$Year != 2003,]
@@ -18,7 +18,7 @@ df$State[df$State == "Odisha"] <- "Orissa"
 df$State[df$State == "Chhatisgarh"] <- "Chhattisgarh"
 
 #Read in population data
-pop <- read.csv("https://raw.githubusercontent.com/alexpavlakis/india_project/master/population.csv", header = TRUE)
+pop <- read.csv("https://raw.githubusercontent.com/julbautista/India-Project/master/population.csv", header = TRUE)
 
 pop <- pop[pop$State != "Andaman and Nicobar Islands"
            & pop$State != "Dadra and Nagar Haveli"
