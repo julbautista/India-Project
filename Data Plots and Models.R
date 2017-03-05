@@ -169,12 +169,11 @@ ind2$State <- factor(ind2$State)
 ind2$State <- factor(ind2$State, levels = ind2$State[order(ind2$Person[ind2$Year == 2012])])
 
 ggplot(ind2[ind2$Year == 2012| ind2$Year == 2005,], aes(Person, State, fill = factor(Year))) +
-  jbplot + jbscale + geom_dotplot(binaxis = "y", dotsize = 0.5) + 
+  jbplot  + geom_dotplot(binaxis = "y", dotsize = 0.5) + 
   labs(x = 'IMR', y = "") +
+  jbcol + jbfill +
   theme(legend.title = element_blank(), panel.grid.major.x = element_blank(), 
-        #panel.background = element_rect(colour = '#BCBCBC', size = 1),
-        panel.border = element_rect(colour = '#BCBCBC', size = 1, fill =NA),
-        axis.line = element_line(colour = '#BCBCBC', size = 1)) 
+        axis.line = element_blank()) 
 
 # par(mfrow = c(1, 1),
 #     mar = c(3, 9, 1, 2),
@@ -423,26 +422,6 @@ for(i in 1:30){
 }
 
 #Just look at the Mus
-par(mfrow = c(1, 1))
-plot(density(rnorm(10^4, 
-                   mean = mean(extract(fit3)$mu_beta),
-                   sd = mean(extract(fit3)$tau_beta))),
-     col = "blue",
-     lwd = 2,
-     ylim = c(0, 15),
-     main = ' ',
-     yaxt = 'n')
-lines(density(rnorm(10^4, 
-                    mean = mean(extract(fit2)$mu_beta),
-                    sd = mean(extract(fit2)$tau_beta))),
-      col = "red",
-      lwd = 2)
-abline(v = mean(extract(fit2)$mu_beta),
-       col = "red",
-       lty = 2)
-abline(v = mean(extract(fit3)$mu_beta),
-       col = "blue",
-       lty = 2)
 
 #plotting alpha for persons
 alpha.per <- colMeans(extract(fit1)$alpha_t[,1:8])
