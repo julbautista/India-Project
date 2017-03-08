@@ -163,17 +163,18 @@ for(i in 1:30){
 multiplot(plotlist = ratioIMR, cols = 6)
 
 
-#Plot IMR in 2012 by State
+#Plot IMR in 2012 amnd 2005 by State
 ind2 <- ind
 ind2$State <- factor(ind2$State)
 ind2$State <- factor(ind2$State, levels = ind2$State[order(ind2$Person[ind2$Year == 2012])])
 
-ggplot(ind2[ind2$Year == 2012| ind2$Year == 2005,], aes(Person, State, fill = factor(Year))) +
+ggplot(ind2[ind2$Year == 2012| ind2$Year == 2005,], aes(Person, State, colour = factor(Year), fill = factor(Year))) +
   jbplot  + geom_dotplot(binaxis = "y", dotsize = 0.5) + 
   labs(x = 'IMR', y = "") +
   jbcol + jbfill +
   theme(legend.title = element_blank(), panel.grid.major.x = element_blank(), 
-        axis.line = element_blank()) 
+        axis.line = element_blank(),
+        axis.text = element_text(colour = "dark grey", family = "Open Sans")) 
 
 # par(mfrow = c(1, 1),
 #     mar = c(3, 9, 1, 2),
