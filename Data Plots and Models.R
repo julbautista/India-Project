@@ -61,7 +61,7 @@ ind$percap <- ind$exp.rup/ind$population
 ind$fm.imr <- ind$Female/ind$Male
 
 #Regress IMR diff on health exp
-summary(lm(fm.imr ~ percap, data = ind))
+#plot(lm(fm.imr ~ percap, data = ind))
 
 #Sort by year
 ind <- ind[order(ind$Year),]
@@ -72,50 +72,73 @@ ind <- within(ind, state.id <- match(State, unique(State)))
 #Create Year id
 ind <- within(ind, year.id <- match(Year, unique(Year)))
 
+#plot pooled values across time, naive look
+pool <- ind %>% group_by(Year) %>% summarise(poolIMR = mean(Person), poolHexp = mean(percap))
+ggplot(pool, aes(poolHexp, poolIMR, label = Year)) + public +
+  geom_smooth(alpha = 0.12, method = 'lm') + 
+  geom_text_repel(segment.color = jbpal$green, point.padding = unit(1.5, "lines"), size = 5) + 
+  geom_point(size = 2.5) + ggtitle("Pooled IMR and Health Exp") +
+  xlab("Health Expenditure") + ylab("Infant Mortality")
+ggsave("naive.pdf", width = 17, height = 8.5)
+
+rm(pool)
+
 #Plot per cap health exp by state over time
 #non uniform y limit 
-healthexp <- list()
-for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, percap)) + jbplot + geom_line() + 
-    labs(x = 'Year', y = 'Health Expenditure', title = unique(ind$State[ind$state.id == i])) + 
-    scale_x_continuous(breaks = c(2005, 2012)) +
-    scale_y_continuous(breaks = c(0, round(max(ind[ind$state.id == i,]$percap)))) +
-    theme(axis.text.x = element_text(size = 5),
-          axis.text.y = element_text(size = 5),
-          plot.title = element_text(size = 9),
-          axis.title.x = element_text(size = 7),
-          axis.title.y = element_text(size = 7),
-          panel.grid.major = element_blank())
-  healthexp[[i]] <- plotter
-}
-multiplot(plotlist = healthexp, cols = 6)
+
+# healthexp <- list()
+# for(i in 1:30){
+#   plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, percap)) + public + geom_line() + 
+#     labs(x = 'Year', y = 'Health Exp', title = unique(ind$State[ind$state.id == i])) + 
+#     scale_x_continuous(breaks = c(2005, 2012)) +
+#     scale_y_continuous(breaks = c(0, round(max(ind[ind$state.id == i,]$percap)))) +
+#     theme(axis.text.x = element_text(size = 5),
+#           axis.text.y = element_text(size = 9),
+#           plot.title = element_text(size = 13),
+#           axis.title.x = element_text(size = 7),
+#           axis.title.y = element_text(size = 7),
+#           panel.grid.major = element_blank())
+#   healthexp[[i]] <- plotter
+# }
+# 
+# ggsave("HexpTime.pdf", plot = grid.arrange(grobs = healthexp, nrow = 6, ncol = 5), width = 17, height = 8.5)
+
+
 
 #uniform y limits healthexp
 healthexp2 <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, percap)) + jbplot + geom_line() + 
+  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, percap) ) + public + geom_line() + 
+    geom_text(x = 2005 + 0.25, y = round(min(ind[ind$state.id == i & ind$Year == 2005,]$percap)) + 350, label = round(min(ind[ind$Year == 2005 & ind$state.id == i ,]$percap)), size = 2) +
+    geom_text(x = 2012 - 0.25, y = round(max(ind[ind$state.id == i & ind$Year == 2012,]$percap)) + 350, label = round(max(ind[ind$Year == 2012 & ind$state.id == i ,]$percap)), size = 2) +
     scale_x_continuous(breaks = c(2005, 2012)) +
-    scale_y_continuous(breaks = c(0, round(min(ind[ind$state.id == i,]$percap)), 3000 ), limits = c(0,3000) ) +
-    labs(x = 'Year', y = 'Health Expenditure', title = unique(ind$State[ind$state.id == i])) +
-    theme(axis.text.x = element_text(size = 5),
-          axis.text.y = element_text(size = 5),
-          plot.title = element_text(size = 9),
-          axis.title.x = element_text(size = 7),
-          axis.title.y = element_text(size = 7),
+    scale_y_continuous(breaks = c(0, 3000 ), limits = c(0,3100) ) +
+    labs(x = 'Year', y = 'Health Exp', title = unique(ind$State[ind$state.id == i])) +
+    
+    theme(axis.text.x = element_text(size = 7),
+          axis.text.y = element_text(size = 7),
+          plot.title = element_text(size = 13),
+          axis.title.x = element_text(size = 9),
+          axis.title.y = element_text(size = 9),
           panel.grid.major = element_blank())
   healthexp2[[i]] <- plotter
 }
-multiplot(plotlist = healthexp2, cols = 6)
-
+ggsave("HexpTime.pdf", plot = grid.arrange(grobs = healthexp2, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 #Plot female and male IMR by state over time
 genderIMR <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, Female)) + jbplot + 
+  #j and gap help create labels for the largest IMR gender gaps per state
+  j <- which.max(abs(ind[ind$state.id == i,]$Female - ind[ind$state.id == i,]$Male))
+  gap <- ind[ind$state.id == i,][j,]
+  
+  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, Female)) + public + 
     geom_line(colour = jbpal$red) + 
     geom_line(aes(Year, Male), colour = jbpal$green) + 
     scale_x_continuous(breaks = c(2005, 2012)) +
-    scale_y_continuous(breaks = c(0, round(max(ind[ind$state.id == i,]$Female))), limits = c(0, 85 ) +
+    scale_y_continuous(breaks = c(0, round(max(ind[ind$state.id == i,]$Female))), limits = c(0, 85)) +
+    geom_text(x = gap$Year, y = gap$Female, label = gap$Female, size = 2, colour =jbpal$red) +
+    geom_text(x = gap$Year, y = gap$Male, label = gap$Male, size = 2, colour = jbpal$green) +
     labs(x = 'Year', y = 'IMR', title = unique(ind$State[ind$state.id == i])) +
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_text(size = 5),
@@ -125,15 +148,18 @@ for(i in 1:30){
           panel.grid.major = element_blank())
   genderIMR[[i]] <- plotter
 }
-multiplot(plotlist = genderIMR, cols = 6)
+ggsave("genderIMR.pdf", plot = grid.arrange(grobs = genderIMR, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 
 #Plot IMR by state over time
 IMR <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, Person)) + jbplot + geom_line() + 
+  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, Person)) + public + geom_line() + 
     scale_x_continuous(breaks = c(2005, 2012)) +
-    scale_y_continuous(breaks = c(0, round(min(ind[ind$state.id == i,]$Person)), round(max(ind[ind$state.id == i,]$Person)), 80 ), limits = c(0,80) ) +
+    scale_y_continuous(breaks = c(0,80), limits = c(0,80) ) +
+    geom_text(x = 2012, y = round(max(ind[ind$state.id == i,]$Person)), label = round(min(ind[ind$state.id == i,]$Person)), size = 2) +
+    geom_text(x = 2005, y = round(min(ind[ind$state.id == i,]$Person)), label = round(max(ind[ind$state.id == i,]$Person)), size = 2) +
+    
     labs(x = 'Year', y = 'IMR', title = unique(ind$State[ind$state.id == i])) +
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_text(size = 5),
@@ -143,14 +169,15 @@ for(i in 1:30){
           panel.grid.major = element_blank())
   IMR[[i]] <- plotter
 }
-multiplot(plotlist = IMR, cols = 6)
+ggsave("IMR.pdf", plot = grid.arrange(grobs = IMR, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 #Plot IMR RATIO by state over time
 ratioIMR <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, fm.imr)) + jbplot + geom_line() + 
+  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, fm.imr)) + public + geom_line() + 
     scale_x_continuous(breaks = c(2005, 2012)) +
     scale_y_continuous(breaks = c(0, round(min(ind[ind$state.id == i,]$fm.imr)), round(max(ind[ind$state.id == i,]$Person)), 2.7 ), limits = c(0,2.7) ) +
+    geom_hline(yintercept = 1, linetype = 2, alpha = 0.2) +    
     labs(x = 'Year', y = 'IMR Ratio', title = unique(ind$State[ind$state.id == i])) +
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_text(size = 5),
@@ -160,53 +187,29 @@ for(i in 1:30){
           panel.grid.major = element_blank())
   ratioIMR[[i]] <- plotter
 }
-multiplot(plotlist = ratioIMR, cols = 6)
+ggsave("IMRratio.pdf", plot = grid.arrange(grobs = ratioIMR, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 
-#Plot IMR in 2012 amnd 2005 by State
+
+#Plot IMR in 2012 and 2005 by State
 ind2 <- ind
 ind2$State <- factor(ind2$State)
 ind2$State <- factor(ind2$State, levels = ind2$State[order(ind2$Person[ind2$Year == 2012])])
 
-ggplot(ind2[ind2$Year == 2012| ind2$Year == 2005,], aes(Person, State, colour = factor(Year), fill = factor(Year))) +
-  jbplot  + geom_dotplot(binaxis = "y", dotsize = 0.5) + 
+IMR0512 <- ggplot(ind2[ind2$Year == 2012| ind2$Year == 2005,], aes(Person, State, colour = factor(Year), fill = factor(Year))) + 
+  ggtitle("Infant Mortality Rate per State, 2012 and 2005") +
+  public  + 
+  geom_dotplot(binaxis = "y", dotsize = 0.35) + 
   labs(x = 'IMR', y = "") +
   jbcol + jbfill +
   theme(legend.title = element_blank(), panel.grid.major.x = element_blank(), 
         axis.line = element_blank(),
-        axis.text = element_text(colour = "dark grey", family = "Open Sans")) 
+        axis.text = element_text(colour = "#2f4f4f", family = "Open Sans", size = 14),
+        legend.text = element_text(colour = "#2f4f4f", family = "Open Sans", size = 20)) 
+ggsave("IMR0512.pdf", plot = IMR0512, width = 17, height = 8.5)
 
-# par(mfrow = c(1, 1),
-#     mar = c(3, 9, 1, 2),
-#     las = 1,
-#     cex = 0.7)
-# plot(ind$Person[ind$Year == 2012],
-#      c(1:30),
-#      yaxt = 'n',
-#      ylab = " ",
-#      xlim = c(0, 80),
-#      pch = 16,
-#      lwd = 0.5,
-#      xlab = "Infant Mortality Rate",
-#      main = NULL)
-# axis(2, at = c(1:30), 
-#      labels = c(ind$State[ind$Year == 2012]),
-#      cex = 0.8)
-# abline(h = c(1:30), col = "grey")
-# points(ind$Person[ind$Year == 2012],
-#        c(1:30),
-#        pch = 16,
-#        cex = 0.8)
-# text(50, 30, "2012")
-# text(80, 30, "2005",
-#      col = "blue")
-# 
-# #Add blue points for 2005
-# points(ind$Person[ind$Year == 2005],
-#        c(1:30),
-#        pch = 16,
-#        cex = 1,
-#        col = "blue")
+rm(ind2)
+
 
 #Stan model normal for females
 year_id <- ind$year.id
@@ -239,12 +242,16 @@ pred <- list()
 for(i in 1:30){
   plotter <- ggplot(subset(ind,ind$state.id == i), 
                     aes(Year, pred)) + 
-    jbplot + geom_line()  +
+    public + #geom_line()  +
     geom_line(aes(Year, Female), colour = jbpal$green) +
     geom_line(aes(Year,y.lower), linetype = 'dashed', alpha = 0.3) +
     geom_line(aes(Year,y.upper), linetype = 'dashed', alpha = 0.3) +
     scale_x_continuous(breaks = c(2005, 2012)) +
-    scale_y_continuous(breaks = c(0, round(min(ind[ind$state.id == i,]$pred)), round(max(ind[ind$state.id == i,]$pred)), 80 ), limits = c(0,80 ) ) +
+    scale_y_continuous(breaks = c(0, 80), limits = c(0,80 ) ) +
+    
+    geom_text(x = 2012, y = round(max(ind[ind$state.id == i,]$Female)), label = round(min(ind[ind$state.id == i,]$Female)), size = 2) +
+    geom_text(x = 2005, y = round(min(ind[ind$state.id == i,]$Female)), label = round(max(ind[ind$state.id == i,]$Female)), size = 2) +
+    
     labs(x = 'Year', y = 'IMR', title = unique(ind$State[ind$state.id == i])) +
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_text(size = 5),
@@ -254,11 +261,67 @@ for(i in 1:30){
           panel.grid.major = element_blank())
   pred[[i]] <- plotter
 }
-multiplot(plotlist = pred, cols = 6)
+ggsave("predfem.pdf", plot = grid.arrange(grobs = pred, nrow = 6, ncol = 5), width = 17, height = 8.5)
+
+#Posterior Predictive Check
+ggplot(ind, aes(pred, Female)) + public + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind, aes(y = Female, x = pred, xmin = y.lower, xmax = y.upper)) + geom_point() + ggtitle("Posterior Predictive Check on Females") + xlim(c(0,80)) + ylim(c(0,80))
+ggsave("postpredfem.pdf", width = 17, height = 8.5)
+
+#Male pred model
+year_id <- ind$year.id
+state_id <- ind$state.id
+imr <- (ind$Male)
+percap <- ind$percap
+N <- length(imr)
+
+fitm <- stan("normal.stan",
+             data = list("year_id", "state_id", "N", "imr","percap"),
+             iter = 2000, chains = 4)
+
+print(fitm, pars = c("mu_alpha_s", "tau_alpha_s", 
+                     "mu_alpha_t", "tau_alpha_t",
+                     "beta", "alpha_t"))
+
+#extract quantiles
+ind$y.upperm <- NULL
+ind$y.lowerm <- NULL
+for(i in 1:240){
+  ind$y.lowerm[i] <- quantile(extract(fitm)$y_pred[,i], 0.25)
+  ind$y.upperm[i] <- quantile(extract(fitm)$y_pred[,i], 0.75)
+}
+
+#plot predicted values by state for males
+#blue is predicted green is actual
+ind$predm <- (colMeans(extract(fitm)$y_pred))
+predm <- list()
+for(i in 1:30){
+  plotter <- ggplot(subset(ind,ind$state.id == i), 
+                    aes(Year, predm)) + 
+    public + #geom_line()  +
+    geom_line(aes(Year, Male), colour = jbpal$green) +
+    geom_line(aes(Year,y.lowerm), linetype = 'dashed', alpha = 0.3) +
+    geom_line(aes(Year,y.upperm), linetype = 'dashed', alpha = 0.3) +
+    scale_x_continuous(breaks = c(2005, 2012)) +
+    scale_y_continuous(breaks = c(0, 80), limits = c(0,80 ) ) +
+    
+    geom_text(x = 2012, y = round(max(ind[ind$state.id == i,]$Male)), label = round(min(ind[ind$state.id == i,]$Male)), size = 2) +
+    geom_text(x = 2005, y = round(min(ind[ind$state.id == i,]$Male)), label = round(max(ind[ind$state.id == i,]$Male)), size = 2) +
+    
+    labs(x = 'Year', y = 'IMR', title = unique(ind$State[ind$state.id == i])) +
+    theme(axis.text.x = element_text(size = 5),
+          axis.text.y = element_text(size = 5),
+          plot.title = element_text(size = 9),
+          axis.title.x = element_text(size = 7),
+          axis.title.y = element_text(size = 7),
+          panel.grid.major = element_blank())
+  predm[[i]] <- plotter
+}
+ggsave("predmal.pdf", plot = grid.arrange(grobs = predm, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 
 #Posterior Predictive Check
-ggplot(ind, aes(pred, Female)) + jbplot + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind, aes(y = Female, x = pred, xmin = y.lower, xmax = y.upper)) + geom_point() 
+ggplot(ind, aes(predm, Male)) + public + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind, aes(y = Male, x = predm, xmin = y.lowerm, xmax = y.upperm)) + geom_point() + ggtitle("Posterior Predictive Check on Males") + xlim(c(0,80)) + ylim(c(0,80))
+ggsave("postpredfem.pdf", width = 17, height = 8.5)
 
 
 library(plyr)
@@ -297,16 +360,20 @@ for(i in 1:N){
 ind1$pred2 <- exp(colMeans(extract(fit2)$y_pred))
 
 pred2 <- list()
-for(i in 1:6){
+for(i in 1:30){
   plotter <- ggplot(subset(ind1,ind1$state.id == i), 
                     aes(Year, pred2)) + 
-    jbplot + geom_line()  +
+    public + #geom_line()  +
     geom_line(aes(Year, Female), colour = jbpal$green) +
     geom_line(aes(Year,y.lower2), linetype = 'dashed', alpha = 0.3) +
     geom_line(aes(Year,y.upper2), linetype = 'dashed', alpha = 0.3) +
     scale_x_continuous(breaks = c(2006, 2012)) +
-    scale_y_continuous(breaks = c(0, round(min(ind1[ind1$state.id == i,]$pred2)), round(max(ind1[ind1$state.id == i,]$pred2)), 90), limits = c(0,90) ) +
+    scale_y_continuous(breaks = c(0, 90), limits = c(0,90) ) +
     labs(x = 'Year', y = 'IMR', title = unique(ind1$State[ind1$state.id == i])) +
+    
+    geom_text(x = 2012, y = round(max(ind1[ind1$state.id == i,]$Female)), label = round(min(ind1[ind1$state.id == i,]$Female)), size = 2) +
+    geom_text(x = 2006, y = round(min(ind1[ind1$state.id == i,]$Female)), label = round(max(ind1[ind1$state.id == i,]$Female)), size = 2) +
+    
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_text(size = 5),
           plot.title = element_text(size = 9),
@@ -315,11 +382,14 @@ for(i in 1:6){
           panel.grid.major = element_blank())
   pred2[[i]] <- plotter
 }
-multiplot(plotlist = pred2, cols = 6)
+ggsave("lagpredfem.pdf", plot = grid.arrange(grobs = pred2, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 
 #Posterior Predictive Check
-ggplot(ind1, aes(pred2, Female)) + jbplot + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind1, aes(y = Female, x = pred2, xmin = y.lower2, xmax = y.upper2)) + geom_point() 
+ggplot(ind1, aes(pred2, Female)) + public + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind1, aes(y = Female, x = pred2, xmin = y.lower2, xmax = y.upper2)) + geom_point() + ggtitle("Posterior Predictive Check on Females") + xlim(c(0,90)) + ylim(c(0,90)) + xlab("Pred")
+ggsave("lagpostpredfem.pdf", width = 17, height = 8.5)
+
+
 
 
 
@@ -353,12 +423,14 @@ pred3 <- list()
 for(i in 1:30){
   plotter <- ggplot(subset(ind1,ind1$state.id == i), 
                     aes(Year, pred3)) + 
-    jbplot + geom_line()  +
+    public + #geom_line()  +
     geom_line(aes(Year, Male), colour = jbpal$green) +
     geom_line(aes(Year,y.lower3), linetype = 'dashed', alpha = 0.3) +
     geom_line(aes(Year,y.upper3), linetype = 'dashed', alpha = 0.3) +
     scale_x_continuous(breaks = c(2006, 2012)) +
-    scale_y_continuous(breaks = c(0, round(min(ind1[ind1$state.id == i,]$pred3)), round(max(ind1[ind1$state.id == i,]$pred3)), 85 ), limits = c(0,85 ) ) +
+    scale_y_continuous(breaks = c(0, 85 ), limits = c(0,85 ) ) +
+    geom_text(x = 2012, y = round(max(ind1[ind1$state.id == i,]$Male)), label = round(min(ind1[ind1$state.id == i,]$Male)), size = 2) +
+    geom_text(x = 2006, y = round(min(ind1[ind1$state.id == i,]$Male)), label = round(max(ind1[ind1$state.id == i,]$Male)), size = 2) +
     labs(x = 'Year', y = 'IMR', title = unique(ind1$State[ind1$state.id == i])) +
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_text(size = 5),
@@ -368,11 +440,12 @@ for(i in 1:30){
           panel.grid.major = element_blank())
   pred3[[i]] <- plotter
 }
-multiplot(plotlist = pred3, cols = 6)
+ggsave("lagpredmal.pdf", plot = grid.arrange(grobs = pred3, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 
 #Posterior Predictive Check
-ggplot(ind1, aes(pred3, Male)) + jbplot + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind1, aes(y = Male, x = pred3, xmin = y.lower3, xmax = y.upper3)) + geom_point() 
+ggplot(ind1, aes(pred3, Male)) + public + geom_abline(slope = 1, intercept = 0) + geom_errorbarh(data = ind1, aes(y = Male, x = pred3, xmin = y.lower3, xmax = y.upper3)) + geom_point() + ggtitle("Posterior Predictive Check on Males") + xlim(c(0,85)) + ylim(c(0,85)) + xlab("Pred")
+ggsave("lagpostpredmal.pdf", width = 17, height = 8.5)
 
 
 #Look at distribution of effects by state in lagged log model
@@ -383,11 +456,12 @@ beta_female <- data.frame(extract(fit2)$beta)
 
 dense <- list()
 for(i in 1:30){
-  plotter <- ggplot(beta_male, 
-                    aes(beta_male[,i] )) + 
-    jbplot + geom_density()  + xlim(-0.5,0.5) + ylim(0,9.5) +
-    geom_density(data = beta_female, aes(beta_female[,i]), colour = jbpal$green) +
+  dense[[i]] <- ggplot(beta_male, 
+                    aes_(x = beta_male[,i] )) + 
+    public + geom_density()  + xlim(-0.5,0.5) + ylim(0,9.5) +
+    geom_density(data = beta_female, aes_(x = beta_female[,i]), colour = jbpal$green) +
     labs(x = 'IMR', title = unique(ind1$State[ind1$state.id == i])) +
+    geom_vline(xintercept = 0, alpha = 0.4, linetype = 2) +
     theme(axis.text.x = element_text(size = 5),
           axis.text.y = element_blank(),
           plot.title = element_text(size = 9),
@@ -395,32 +469,12 @@ for(i in 1:30){
           axis.title.y = element_blank(),
           axis.line.y = element_blank(),
           panel.grid.major = element_blank())
-  dense[[i]] <- plotter
+  #dense[[i]] <- plotter
 }
-multiplot(plotlist = dense, cols = 6)
 
-par(mfrow = c(5, 6), 
-    mar = c(2, 1, 1, 1),
-    mgp = c(2, 1, 0))
-for(i in 1:30){
-  plot(density(extract(fit3)$beta[,i]),
-       yaxt = 'n',
-       xaxt = 'n',
-       xlim = c(-.5, .5),
-       ylim = c(0, 9.5),
-       main = paste(unique(ind1$State[ind1$state.id == i])), 
-       cex.main = 0.9,
-       col = "blue")
-  abline(v = 0,
-         col = "darkgrey",
-         lty = 2,
-         lwd = 2)
-  axis(1, at = c(-.5, 0, .5),
-       cex.axis = 0.8)
-  #And compare to the ladies
-  lines(density(extract(fit2)$beta[,i]),
-        col = "red")
-}
+ggsave("betas.pdf", plot = grid.arrange(grobs = dense, nrow = 6, ncol = 5), width = 17, height = 8.5)
+
+
 
 #Just look at the Mus
 
@@ -432,6 +486,12 @@ for(i in 1:8){
   alpha.per.upper[i] <- quantile(extract(fit1)$alpha_t[,i], 0.25)
   alpha.per.lower[i] <- quantile(extract(fit1)$alpha_t[,i], 0.75)
 }
+
+alphas <- data.frame(year = c(2005:2012), alpha.per, alpha.per.upper, alpha.per.lower)
+
+ggplot(alphas, aes(year, alpha.per))  + ylim(c(0,35)) + public +
+  geom_errorbar(ymin = alpha.per.lower, ymax = alpha.per.upper, colour = jbpal$green, alpha = 1, width = 0.1) + scale_x_continuous(breaks = c(2005:2012)) + theme(panel.grid.major = element_blank()) + ggtitle("Time Intercepts") + labs(x = "Year", y = "Intercept") + geom_point(size = 3)
+ggsave("alphas.pdf", width = 17, height = 8.5)
 
 par(mfrow = c(1, 1))
 plot(c(2005:2012), alpha.per,
