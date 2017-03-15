@@ -493,30 +493,30 @@ ggplot(alphas, aes(year, alpha.per))  + ylim(c(0,35)) + public +
   geom_errorbar(ymin = alpha.per.lower, ymax = alpha.per.upper, colour = jbpal$green, alpha = 1, width = 0.1) + scale_x_continuous(breaks = c(2005:2012)) + theme(panel.grid.major = element_blank()) + ggtitle("Time Intercepts") + labs(x = "Year", y = "Intercept") + geom_point(size = 3)
 ggsave("alphas.pdf", width = 17, height = 8.5)
 
-par(mfrow = c(1, 1))
-plot(c(2005:2012), alpha.per,
-     xlim = c(2005, 2012), 
-     ylim = c(0, 40),
-     pch = 16,
-     cex = 0.6,
-     xlab = "Years",
-     ylab = "Time Intercept")
-abline(0, 1)
-arrows(x0 = c(2005:2012),
-       y0 = alpha.per,
-       x1 = c(2005:2012),
-       y1 = alpha.per.upper,
-       length = 0,
-       col = "darkgrey")
-arrows(x0 = c(2005:2012),
-       y0 = alpha.per,
-       x1 = c(2005:2012),
-       y1 = alpha.per.lower,
-       length = 0,
-       col = "darkgrey")
-points(c(2005:2012), alpha.per,
-       pch = 16, 
-       cex = 0.6)
+# par(mfrow = c(1, 1))
+# plot(c(2005:2012), alpha.per,
+#      xlim = c(2005, 2012), 
+#      ylim = c(0, 40),
+#      pch = 16,
+#      cex = 0.6,
+#      xlab = "Years",
+#      ylab = "Time Intercept")
+# abline(0, 1)
+# arrows(x0 = c(2005:2012),
+#        y0 = alpha.per,
+#        x1 = c(2005:2012),
+#        y1 = alpha.per.upper,
+#        length = 0,
+#        col = "darkgrey")
+# arrows(x0 = c(2005:2012),
+#        y0 = alpha.per,
+#        x1 = c(2005:2012),
+#        y1 = alpha.per.lower,
+#        length = 0,
+#        col = "darkgrey")
+# points(c(2005:2012), alpha.per,
+#        pch = 16, 
+#        cex = 0.6)
 
 
 #plotting alpha for male and female
@@ -535,54 +535,54 @@ for(i in 1:8){
 
 
 
-par(mfrow = c(1, 2))
-plot(c(2005:2012), alpha.male,
-     xlim = c(2005, 2012), 
-     ylim = c(-20, 300),
-     pch = 16,
-     cex = 0.6,
-     main = "Male Time Intercept",
-     xlab = "Years",
-     ylab = "Time Intercept")
-abline(0, 1)
-arrows(x0 = c(2005:2012),
-       y0 = alpha.male,
-       x1 = c(2005:2012),
-       y1 = alpha.male.upper,
-       length = 0,
-       col = "darkgrey")
-arrows(x0 = c(2005:2012),
-       y0 = alpha.male,
-       x1 = c(2005:2012),
-       y1 = alpha.male.lower,
-       length = 0,
-       col = "darkgrey")
-points(c(2005:2012), alpha.male,
-       pch = 16, 
-       cex = 0.6)
-
-plot(c(2005:2012), alpha.female,
-     xlim = c(2005, 2012), 
-     ylim = c(-20, 300),
-     pch = 16,
-     cex = 0.6,
-     main = "Female Time Intercept",
-     xlab = "Years",
-     ylab = "Time Intercept")
-abline(0, 1)
-arrows(x0 = c(2005:2012),
-       y0 = alpha.female,
-       x1 = c(2005:2012),
-       y1 = alpha.female.upper,
-       length = 0,
-       col = "darkgrey")
-arrows(x0 = c(2005:2012),
-       y0 = alpha.female,
-       x1 = c(2005:2012),
-       y1 = alpha.female.lower,
-       length = 0,
-       col = "darkgrey")
-points(c(2005:2012), alpha.female,
-       pch = 16, 
-       cex = 0.6)
+# par(mfrow = c(1, 2))
+# plot(c(2005:2012), alpha.male,
+#      xlim = c(2005, 2012), 
+#      ylim = c(-20, 300),
+#      pch = 16,
+#      cex = 0.6,
+#      main = "Male Time Intercept",
+#      xlab = "Years",
+#      ylab = "Time Intercept")
+# abline(0, 1)
+# arrows(x0 = c(2005:2012),
+#        y0 = alpha.male,
+#        x1 = c(2005:2012),
+#        y1 = alpha.male.upper,
+#        length = 0,
+#        col = "darkgrey")
+# arrows(x0 = c(2005:2012),
+#        y0 = alpha.male,
+#        x1 = c(2005:2012),
+#        y1 = alpha.male.lower,
+#        length = 0,
+#        col = "darkgrey")
+# points(c(2005:2012), alpha.male,
+#        pch = 16, 
+#        cex = 0.6)
+# 
+# plot(c(2005:2012), alpha.female,
+#      xlim = c(2005, 2012), 
+#      ylim = c(-20, 300),
+#      pch = 16,
+#      cex = 0.6,
+#      main = "Female Time Intercept",
+#      xlab = "Years",
+#      ylab = "Time Intercept")
+# abline(0, 1)
+# arrows(x0 = c(2005:2012),
+#        y0 = alpha.female,
+#        x1 = c(2005:2012),
+#        y1 = alpha.female.upper,
+#        length = 0,
+#        col = "darkgrey")
+# arrows(x0 = c(2005:2012),
+#        y0 = alpha.female,
+#        x1 = c(2005:2012),
+#        y1 = alpha.female.lower,
+#        length = 0,
+#        col = "darkgrey")
+# points(c(2005:2012), alpha.female,
+#        pch = 16, 
+#        cex = 0.6)
 
