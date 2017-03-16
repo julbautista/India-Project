@@ -108,7 +108,8 @@ rm(pool)
 #uniform y limits healthexp
 healthexp2 <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, percap) ) + public + geom_line() + 
+  healthexp2[[i]] <- 
+    ggplot(subset(ind,ind$state.id == i), aes(Year, percap) ) + public + geom_line() + 
     geom_text(x = 2005 + 0.25, y = round(min(ind[ind$state.id == i & ind$Year == 2005,]$percap)) + 350, label = round(min(ind[ind$Year == 2005 & ind$state.id == i ,]$percap)), size = 2) +
     geom_text(x = 2012 - 0.25, y = round(max(ind[ind$state.id == i & ind$Year == 2012,]$percap)) + 350, label = round(max(ind[ind$Year == 2012 & ind$state.id == i ,]$percap)), size = 2) +
     scale_x_continuous(breaks = c(2005, 2012)) +
@@ -121,7 +122,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 9),
           axis.title.y = element_text(size = 9),
           panel.grid.major = element_blank())
-  healthexp2[[i]] <- plotter
 }
 ggsave("HexpTime.pdf", plot = grid.arrange(grobs = healthexp2, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -132,7 +132,7 @@ for(i in 1:30){
   j <- which.max(abs(ind[ind$state.id == i,]$Female - ind[ind$state.id == i,]$Male))
   gap <- ind[ind$state.id == i,][j,]
   
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, Female)) + public + 
+  genderIMR[[i]] <- ggplot(subset(ind,ind$state.id == i), aes(Year, Female)) + public + 
     geom_line(colour = jbpal$red) + 
     geom_line(aes(Year, Male), colour = jbpal$green) + 
     scale_x_continuous(breaks = c(2005, 2012)) +
@@ -146,7 +146,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  genderIMR[[i]] <- plotter
 }
 ggsave("genderIMR.pdf", plot = grid.arrange(grobs = genderIMR, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -154,7 +153,8 @@ ggsave("genderIMR.pdf", plot = grid.arrange(grobs = genderIMR, nrow = 6, ncol = 
 #Plot IMR by state over time
 IMR <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, Person)) + public + geom_line() + 
+  IMR[[i]] <- 
+    ggplot(subset(ind,ind$state.id == i), aes(Year, Person)) + public + geom_line() + 
     scale_x_continuous(breaks = c(2005, 2012)) +
     scale_y_continuous(breaks = c(0,80), limits = c(0,80) ) +
     geom_text(x = 2012, y = round(max(ind[ind$state.id == i,]$Person)), label = round(min(ind[ind$state.id == i,]$Person)), size = 2) +
@@ -167,14 +167,14 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  IMR[[i]] <- plotter
 }
 ggsave("IMR.pdf", plot = grid.arrange(grobs = IMR, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
 #Plot IMR RATIO by state over time
 ratioIMR <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), aes(Year, fm.imr)) + public + geom_line() + 
+  ratioIMR[[i]] <- 
+    ggplot(subset(ind,ind$state.id == i), aes(Year, fm.imr)) + public + geom_line() + 
     scale_x_continuous(breaks = c(2005, 2012)) +
     scale_y_continuous(breaks = c(0, round(min(ind[ind$state.id == i,]$fm.imr)), round(max(ind[ind$state.id == i,]$Person)), 2.7 ), limits = c(0,2.7) ) +
     geom_hline(yintercept = 1, linetype = 2, alpha = 0.2) +    
@@ -185,7 +185,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  ratioIMR[[i]] <- plotter
 }
 ggsave("IMRratio.pdf", plot = grid.arrange(grobs = ratioIMR, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -240,7 +239,7 @@ ind$pred <- (colMeans(extract(fit1)$y_pred))
 
 pred <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), 
+  pred[[i]] <- ggplot(subset(ind,ind$state.id == i), 
                     aes(Year, pred)) + 
     public + #geom_line()  +
     geom_line(aes(Year, Female), colour = jbpal$green) +
@@ -259,7 +258,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  pred[[i]] <- plotter
 }
 ggsave("predfem.pdf", plot = grid.arrange(grobs = pred, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -295,7 +293,7 @@ for(i in 1:240){
 ind$predm <- (colMeans(extract(fitm)$y_pred))
 predm <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind,ind$state.id == i), 
+  predm[[i]] <- ggplot(subset(ind,ind$state.id == i), 
                     aes(Year, predm)) + 
     public + #geom_line()  +
     geom_line(aes(Year, Male), colour = jbpal$green) +
@@ -314,7 +312,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  predm[[i]] <- plotter
 }
 ggsave("predmal.pdf", plot = grid.arrange(grobs = predm, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -324,11 +321,8 @@ ggplot(ind, aes(predm, Male)) + public + geom_abline(slope = 1, intercept = 0) +
 ggsave("postpredfem.pdf", width = 17, height = 8.5)
 
 
-library(plyr)
 #create lagged per cap variable
-ind <- ddply(ind, .(state.id), 
-             transform, 
-             lag.exp = c(NA, percap[-length(percap)]))
+ind <- ind %>% group_by(state.id) %>% mutate(lag.exp = c(NA, percap[-length(percap)]))
 
 #Get rid of 2005
 ind1 <- ind[ind$Year != 2005,]
@@ -361,7 +355,7 @@ ind1$pred2 <- exp(colMeans(extract(fit2)$y_pred))
 
 pred2 <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind1,ind1$state.id == i), 
+  pred2[[i]] <- ggplot(subset(ind1,ind1$state.id == i), 
                     aes(Year, pred2)) + 
     public + #geom_line()  +
     geom_line(aes(Year, Female), colour = jbpal$green) +
@@ -380,7 +374,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  pred2[[i]] <- plotter
 }
 ggsave("lagpredfem.pdf", plot = grid.arrange(grobs = pred2, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -421,7 +414,7 @@ ind1$pred3 <- exp(colMeans(extract(fit3)$y_pred))
 
 pred3 <- list()
 for(i in 1:30){
-  plotter <- ggplot(subset(ind1,ind1$state.id == i), 
+  pred3[[i]] <- ggplot(subset(ind1,ind1$state.id == i), 
                     aes(Year, pred3)) + 
     public + #geom_line()  +
     geom_line(aes(Year, Male), colour = jbpal$green) +
@@ -438,7 +431,6 @@ for(i in 1:30){
           axis.title.x = element_text(size = 7),
           axis.title.y = element_text(size = 7),
           panel.grid.major = element_blank())
-  pred3[[i]] <- plotter
 }
 ggsave("lagpredmal.pdf", plot = grid.arrange(grobs = pred3, nrow = 6, ncol = 5), width = 17, height = 8.5)
 
@@ -469,7 +461,6 @@ for(i in 1:30){
           axis.title.y = element_blank(),
           axis.line.y = element_blank(),
           panel.grid.major = element_blank())
-  #dense[[i]] <- plotter
 }
 
 ggsave("betas.pdf", plot = grid.arrange(grobs = dense, nrow = 6, ncol = 5), width = 17, height = 8.5)
@@ -520,18 +511,19 @@ ggsave("alphas.pdf", width = 17, height = 8.5)
 
 
 #plotting alpha for male and female
-alpha.female <- exp(colMeans(extract(fit2)$alpha_t[,1:8]))
-alpha.male <- exp(colMeans(extract(fit3)$alpha_t[,1:8]))
-alpha.female.upper <- NULL
-alpha.female.lower <- NULL
-alpha.male.upper <- NULL
-alpha.male.lower <- NULL
-for(i in 1:8){
-  alpha.female.upper[i] <- exp(quantile(extract(fit2)$alpha_t[,i], 0.25))
-  alpha.female.lower[i] <- exp(quantile(extract(fit2)$alpha_t[,i], 0.75))
-  alpha.male.upper[i] <- exp(quantile(extract(fit3)$alpha_t[,i], 0.25))
-  alpha.male.lower[i] <- exp(quantile(extract(fit3)$alpha_t[,i], 0.75))
-}
+
+# alpha.female <- exp(colMeans(extract(fit2)$alpha_t[,1:8]))
+# alpha.male <- exp(colMeans(extract(fit3)$alpha_t[,1:8]))
+# alpha.female.upper <- NULL
+# alpha.female.lower <- NULL
+# alpha.male.upper <- NULL
+# alpha.male.lower <- NULL
+# for(i in 1:8){
+#   alpha.female.upper[i] <- exp(quantile(extract(fit2)$alpha_t[,i], 0.25))
+#   alpha.female.lower[i] <- exp(quantile(extract(fit2)$alpha_t[,i], 0.75))
+#   alpha.male.upper[i] <- exp(quantile(extract(fit3)$alpha_t[,i], 0.25))
+#   alpha.male.lower[i] <- exp(quantile(extract(fit3)$alpha_t[,i], 0.75))
+# }
 
 
 
